@@ -65,7 +65,6 @@ Once you have imported your data:
     + one thing I have done is to put in the code for my checks, but to comment it out (e.g., `# head(dat)` or `# str(iris)` or `# View(iris)`) so that it doesn't clutter up the report, but someone examining the code can see that I did go through and check it out
     + still, I usually delete these lines of code just to keep things clean and streamlined
 
-
 ```{r data import}
 # Remove the `Packages` variable from your environment
 rm(Packages)
@@ -82,27 +81,14 @@ data <- read.csv("data-in/mydat.csv")
 
 ```
 
-* if there are any important things to note about the dataset after importing, formatting, please note that here
-    + that said, it is not necessary to include any text here if there isn't anything that is noteworthy
-* do **NOT** print out a whole dataset into your report unless it is really tiny, AND there is a good reason to show it!
-* if there is something important for the readers / users of the report to note about the structure of the data, perhaps you can show the first few lines of the data frame, but don't do more than that unless there is a really good reason
-* if you must show part of the data, use the `kable` function (from the `knitr` package), along with formatting from `kableExtras` to make it prettier / easier to read than base R
-
 ## data formatting
 
-Data formatting, cleaning, and munging is typically the most time-consuming part of any analysis. Much of the time it makes sense to divide this into multiple code chunks, don't hesitate to do so if it makes it logically easier to follow, or if it makes it easier to code.
-
-Include some text here giving an overview of what needs to be done in the chunk or chunks below. If you do use multiple code chunks, include at least a little bit of text before each chunk alerting the reader what that chunk is doing.
-
-Often, we will merge multiple disparate datasets together. If this happens, and one or more of the input datasets is not used again, my preference is to remove those datasets to keep the analysis environment streamlined (following the "workspace / environment philosopy" text above).
-
-If there are columns in a dataset that are never used, my preference is to delete them, again to keep things clear and simple; this is where you want to do that. Using `dplyr::select()` is a good way to do that.
+ADD TEXT HERE ON WHAT I DO TO THE DATA BELOW AND WHY 
 
 ```{r data formatting}
+# Create new dataset with important variables of interest using dplyr::select()
 
-# this is where you format your data
-
-# again, consider using multiple code chunks
+# Create false intervention variable (will be deleted after unblinding )
 
 # cleanup
 # (always clean up after yourself)
