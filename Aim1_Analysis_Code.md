@@ -1,7 +1,7 @@
 ---
 title: "Aim 1 Analysis Code"
 author: "Courtney Victor"
-date: "started 05 February 2024; most recent edits `r format(Sys.time(), '%d %B %Y')`"
+date: "started 05 February 2024; most recent edits 06 February 2024"
 output:
   html_document:
     toc: true
@@ -16,9 +16,7 @@ output:
 
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 # Introduction
 
@@ -28,7 +26,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à Água e a Saúde Infantil em Moçambique” (PAASIM- Research on Access to Water and Child Health in Mozambique). The purpose of this project is to evaluate the impact of a new piped water network among informal settlements in the city of Beira using a matched control study design. A detailed description of the study protocol can be found here: https://bmjopen.bmj.com/content/13/3/e067341. The pre-specified analysis plan can be found here: https://osf.io/4rkn6/. 
 
-```{r packages, message = F, results = F, warning = F}
+
+```r
 # CREATE PACKAGE LIST:
 Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate") 
 
@@ -37,12 +36,11 @@ lapply(Packages, library, character.only = TRUE)
 
 # SUPPRESS UNHELPFUL `dplyr` MESSAGES: 
 options(dplyr.summarise.inform = FALSE)
-
 ```
 
 **Packages used:**
 
-`r Packages`
+tidyverse, knitr, kableExtra, readxl, evaluate
 
 # Data
 
@@ -56,7 +54,8 @@ In brief, our intervention will be defined in two ways:
 ### Outcome 
 We have water quality and access data from 548 households x 5 timepoints. Water quality will be defined by presence of *E. coli* (primary outcome), total coliforms, free and total chlorine, pressure, and enteropathogen data (from a subset of 100 households). We also have survey data that includes questions on satisfaction with water pressure, service, availability, and quality. Water access will be defined by the HWISE score, more information can be found here: https://www.ipr.northwestern.edu/wise-scales/measure-water-insecurity/. 
 
-```{r data import, warning = FALSE}
+
+```r
 # Remove the `Packages` variable from your environment
 rm(Packages)
 
@@ -66,21 +65,20 @@ data <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/L
 # head(data)
 # str(data)
 # View(data)
-
 ```
 
 ## data formatting
 
 ADD TEXT HERE ON WHAT I DO TO THE DATA BELOW AND WHY 
 
-```{r data formatting}
+
+```r
 # Create new dataset with important variables of interest using dplyr::select()
 
 # Create false intervention variable (will be deleted after unblinding )
 
 # cleanup
 # (always clean up after yourself)
-
 ```
 
 # Analysis Outline
@@ -101,12 +99,12 @@ In most of the empirically focused papers we write, the Results section starts o
 
 In this context, I think it is helpful to put **in-line code** into the **text** section of the report (i.e., not in a chunk) so that the results can be, well, contextualized. For example, we could report on the mean sepal width in the `iris` dataframe that is included with R:
 
-* mean sepal width in the `iris` dataframe: `r mean(iris$Sepal.Width)`
+* mean sepal width in the `iris` dataframe: 3.0573333
 
 Sometimes it makes sense to include a code chunk (i.e., not just inline code) here, if needed to make more complex calculations; anything more than a couple of operations is typically best left to a code chunk, and can then be reported on in the text below the code chunk. The chunk below includes code from Loy et al.'s accelerated snowmelt and seed production analysis; the lines of codes included outside of the chunk (in the default Rmarkdown text) are repeated within the chunk (but commented out and thus not evaluated in the chunk). While this is by definition repetitive, it makes it easy for a reader of the Rmarkdown report to see how the calculations were conducted, without having to separately open the .Rmd file.
 
-```{r data overview, eval = F}
 
+```r
 # FIRST THING if altering: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
 
 # this code is just an example of one way this could be done; change to best suit the purposes of your project.
@@ -125,7 +123,6 @@ plants.per.treat = masterdat %>% group_by(plot.treat) %>%
 # Total number of seeds
 # * `r as.integer(sum(masterdat$totalseeds))` total seeds
 # "as.integer" makes it so that it does not display in scientific notation
-
 ```
 
 ## Analysis component 1
@@ -145,8 +142,8 @@ Now we move on to the actual data analyses...
 
 In addition, for many if not most analyses, we typically have to do a little bit of additional formatting that isn't in the "data formatting" section above. That is perfectly reasonable and often makes the report easier to follow logically. If you are doing that, however, please be sure to include a little bit of text outlining the formatting changes to be made here.
 
-```{r analysis component 1, eval = F}
 
+```r
 # FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
 
 # put any code related to data formatting for an analysis here
@@ -178,7 +175,6 @@ write.csv(out.aov.my.model, file = "results/my-model-results.csv")
 rm(aov.my.model, out.aov.my.model)
 # ...but don't remove your model objects yet, because you need to do model
 # assessment on them (next code chunk)
-
 ```
 
 * after each analysis, **it is really (really) important** to include some text about what the results mean
@@ -190,15 +186,14 @@ rm(aov.my.model, out.aov.my.model)
 
 breaking an analysis down into smaller bits makes sense for many analyses... 
 
-```{r analysis 1 subcomponent 1}
 
+```r
 # this is where you would put your analysis code
 
 # see code chunk above for more specifics!!
 
 # cleanup
 # (always clean up after yourself)
-
 ```
 
 ...but remember for each of those bits to **put some text here** to give some context about the results!
@@ -209,8 +204,8 @@ ALWAYS include data validation: do your data meet the assumptions of the models 
 
 If you ran an analysis two or more alternative ways, you may wish to split the validation component into multiple chunks. Remember to include some explanatory text, usually before and *always* after each chunk, even if very brief.
 
-```{r model validation analysis 1, eval = F}
 
+```r
 # FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
 
 # this is where you would put your code for model validation / assessment
@@ -227,7 +222,6 @@ testZeroInflation(sim.out.my.model, plot = F) # print zero-inflation results
 # CLEANUP
 # again, remove anything that isn't subsequently used in the analysis
 rm(sim.out.my.model)
-
 ```
 
 as always, remember for each of those bits to **put some text here** to give some context about the validation results! Just showing a validation plot without any context is unhelpful. Tell the reader / your future self *why* your plot (or other result) is consistent (or not!) with model assumptions.
@@ -248,8 +242,8 @@ as always, remember for each of those bits to **put some text here** to give som
     + if anyone wants to generate the exact saved plots (i.e. the graphics files) that are in the `plots/` subfolder, the code should be set up to be reproducible so that should be straightforward
 
 
-```{r plot analysis 1, eval = F}
 
+```r
 # FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
 
 # any data preparation / summarization needed for plotting
@@ -273,7 +267,6 @@ ggsave(myplot, file = "plots/myplot.pdf", width = 5, height = 3)
 # # remember to also clean up any objects such as data summarizations
 # # set up for your plotting, e.g.:
 rm(myplotdata, myplot)
-
 ```
 
 you may wish to include some brief text here, e.g., "this plot shows the negative overall effect of potassium cyanide exposure on bee survival, underscoring our statistical results"
@@ -296,7 +289,43 @@ These should all occur together, to keep the overall analysis report easy to rea
 
 before `sessionInfo` we print the messages associated with package loading, using the `replay` function from the `evaluate` package. We do this at the end to make the report more readable, such that readers do not have to wade through long lists of (typically) not-very-helpful messages. But for troubleshooting those messages can be important, so they are listed here.
 
-```{r Session Info}
+
+```r
 sessionInfo()
+```
+
+```
+## R version 4.2.2 (2022-10-31)
+## Platform: aarch64-apple-darwin20 (64-bit)
+## Running under: macOS 14.3
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] evaluate_0.23    readxl_1.4.3     kableExtra_1.4.0 knitr_1.45      
+##  [5] lubridate_1.9.3  forcats_1.0.0    stringr_1.5.1    dplyr_1.1.4     
+##  [9] purrr_1.0.2      readr_2.1.5      tidyr_1.3.1      tibble_3.2.1    
+## [13] ggplot2_3.4.4    tidyverse_2.0.0 
+## 
+## loaded via a namespace (and not attached):
+##  [1] cellranger_1.1.0  bslib_0.6.1       compiler_4.2.2    pillar_1.9.0     
+##  [5] jquerylib_0.1.4   tools_4.2.2       digest_0.6.34     viridisLite_0.4.2
+##  [9] timechange_0.3.0  jsonlite_1.8.8    lifecycle_1.0.4   gtable_0.3.4     
+## [13] pkgconfig_2.0.3   rlang_1.1.3       cli_3.6.2         rstudioapi_0.15.0
+## [17] yaml_2.3.8        xfun_0.41         fastmap_1.1.1     xml2_1.3.6       
+## [21] withr_3.0.0       systemfonts_1.0.5 hms_1.1.3         generics_0.1.3   
+## [25] sass_0.4.8        vctrs_0.6.5       grid_4.2.2        tidyselect_1.2.0 
+## [29] svglite_2.1.3     glue_1.7.0        R6_2.5.1          fansi_1.0.6      
+## [33] rmarkdown_2.25    tzdb_0.4.0        magrittr_2.0.3    scales_1.3.0     
+## [37] htmltools_0.5.7   colorspace_2.1-0  utf8_1.2.4        stringi_1.8.3    
+## [41] munsell_0.5.0     cachem_1.0.8
 ```
 
