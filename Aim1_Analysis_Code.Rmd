@@ -28,12 +28,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à Água e a Saúde Infantil em Moçambique” (PAASIM- Research on Access to Water and Child Health in Mozambique). The purpose of this project is to evaluate the impact of a new piped water network among informal settlements in the city of Beira using a matched control study design. A detailed description of the study protocol can be found here: https://bmjopen.bmj.com/content/13/3/e067341. The pre-specified analysis plan can be found here: https://osf.io/4rkn6/. 
 
-In brief, our intervention will be defined in two ways: (1) People living in neighborhoods with the improved piped water network and (2) individuals who have a household connection to an improved water supply. We have water quality and access data from 548 households x 5 timepoints. Water quality will be defined by presence of *E. coli* (primary outcome), total coliforms, free and total chlorine, pressure, and enteropathogen data (from a subset of 100 households). Water access will be defined by the HWISE score, more information can be found here: https://www.ipr.northwestern.edu/wise-scales/measure-water-insecurity/. 
-
-
 ```{r packages, message = F, results = F, warning = F}
 # CREATE PACKAGE LIST:
-Packages <- c("tidyverse", "knitr", "kableExtra") 
+Packages <- c("tidyverse", "knitr", "kableExtra", "readxl") 
 
 # LOAD PACKAGES:
 lapply(Packages, library, character.only = TRUE)
@@ -49,35 +46,30 @@ options(dplyr.summarise.inform = FALSE)
 
 # Data
 
-## data import
+### Exposure
+In brief, our intervention will be defined in two ways: 
+* (1) People living in neighborhoods with the improved piped water network and 
+* (2) individuals who have a household connection to an improved water supply. 
 
-* describe details of each dataset and where it comes from here (before the code chunk)
-* to import your data:
-    + copy each dataset to be input into the `data-in` subfolder in your repository
-    + your input data should never be anywhere else in the project
-    + **NEVER EVER** use an absolute file path (e.g., `C:/Windows/Bobsdirectory/dataset1.csv`) anywhere, but they are most common in data import code
-    + instead, **ALWAYS** use a relative file path, typically `read.csv("data-in/mydata")` if the name of the data file you added was "mydata"---but always leaving the `data-in/` prefix in the paths
+### Outcome 
+We have water quality and access data from 548 households x 5 timepoints. Water quality will be defined by presence of *E. coli* (primary outcome), total coliforms, free and total chlorine, pressure, and enteropathogen data (from a subset of 100 households). We also have survey data that includes questions on satisfaction with water pressure, service, availability, and quality. Water access will be defined by the HWISE score, more information can be found here: https://www.ipr.northwestern.edu/wise-scales/measure-water-insecurity/. 
 
-Once you have imported your data:
 
 * it is absolutely worth checking out your dataset in various ways, and doing it here (i.e., upon importing)
 * But that *doesn't* mean that those checks should be printed out in your report---they probably shouldn't, they will make the report feel cluttered
     + one thing I have done is to put in the code for my checks, but to comment it out (e.g., `# head(dat)` or `# str(iris)` or `# View(iris)`) so that it doesn't clutter up the report, but someone examining the code can see that I did go through and check it out
     + still, I usually delete these lines of code just to keep things clean and streamlined
 
-```{r data import}
+```{r data import, warning = FALSE}
 # Remove the `Packages` variable from your environment
 rm(Packages)
 
-data <- read.csv("data-in/mydat.csv")
+data <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/Levy, Karen - 1. PAASIM/3. Data and Analysis/Data/Blinded dataset/Cleaned/PAASIM full cleaned data.xlsx")
 
-# # do some simple exploration here to make sure your data are as expected
-# # keep it commented out, so as to keep your report uncluttered
-# head(mydat)
-# str(mydat)
-# View(mydat)
-# you are welcome / encouraged to delete that code after having
-# done some basic checks on your data
+# # doing some simple data exploration
+# head(data)
+# str(data)
+# View(data)
 
 ```
 
