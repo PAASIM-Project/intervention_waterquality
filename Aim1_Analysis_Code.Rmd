@@ -93,7 +93,7 @@ I briefly describe an outline of the planned analyses below:
 * Table 4: Univariate analysis of water quality and access (household-level)
 * Table 5: Multivariate modeling of neighborhood-level intervention status and water quality and access 
 * Table 6: Multivariate modeling of household-level intervention status and water quality and access 
-* Figure 1: Visualization of model results (primary outcome *E. coli*)
+* Figure 2: Visualization of model results (primary outcome *E. coli*)
 
 ## Data overview
 
