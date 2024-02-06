@@ -1,7 +1,7 @@
 ---
-title: "Your Title [must edit]"
-author: "Your Name [must edit]"
-date: "started [date file was begun, in 12 October 2018 format]; most recent edits `r format(Sys.time(), '%d %B %Y')`"
+title: "Aim 1 Analysis Code"
+author: "Courtney Victor"
+date: "started 05 February 2024; most recent edits `r format(Sys.time(), '%d %B %Y')`"
 output:
   html_document:
     toc: true
@@ -18,139 +18,32 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Load packages for analysis 
+
+# Import dataset
 ```
 
-# Preamble [*delete this when altering for your project!*]
+# Introduction
 
-## notes on the .Rmd header
+**Aim 1**: to test how the provision of an improved piped water network impacts water access and quality. 
 
-* the header of this Rmarkdown template file has been altered in several ways...
-    + note that you will need to edit the header with the title, your name, and the start date of the project
-    + the header includes code to update the date when the analysis was last edited, which I really like (the default just puts the date at which you started the project... not that helpful)
-* a table of contents (`toc`) is automatically generated and the sections of it are automatically numbered
-    + because of the auto-numbering, you should use a first level header (a single `#`) to denote the highest-level sections, and go down from there (e.g., `##` to denote a second-level header, etc.)
-    + PLEASE be thoughtful, consistent, and detail-oriented when setting up the header hierarchy in your document; it really helps with viewing and editing the code and especially the report
-* the TOC is "floating", i.e. follows the reader as she or he scrolls down in the document, and can be clicked on to change sections
-    + this is a HUGE advantage for moving around in a complex analysis quickly and easily
-* it includes "code folding": the code is present in the `html` file but is hidden by default, one clicks on a button that says `code` in order to show it. This helps keep the report document streamlined and easy to scroll through.
-* there is an `html` theme called `cosmo` that this template uses; while typographically more aesthetically pleasing than the default, a more important reason to use it is that the headers are not unreasonably huge. This is particularly important given TOC auto-numbering, wherein you must give top-level headers top-level status and in the default, that leads to unreasonably huge text.
-    + I have not played around with the themes much, feel free to use one that generates reasonable header sizes (as long as the evil and dreaded Comic Sans font is never, ever, ever used)
+*Hypotheses*: I predict that a) individuals who live in neighborhoods with the improved piped water network and b) individuals who have a household connection to an improved water supply will have improved cwater quality and access compared to individuals who do not live in such a) neighborhoods or b) households.
 
-## how to use this file
+The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à Água e a Saúde Infantil em Moçambique” (PAASIM- Research on Access to Water and Child Health in Mozambique). The purpose of this project is to evaluate the impact of a new piped water network among informal settlements in the city of Beira using a matched control study design. A detailed description of the study protocol can be found here: https://bmjopen.bmj.com/content/13/3/e067341. The pre-specified analysis plan can be found here: https://osf.io/4rkn6/. 
 
-* this template is set up specifically for `html` Rmarkdown reports (not `pdf`)
-* remember to replace (nearly) all of the text with text specific to your project
-* you can refer to the .Rmd file in https://github.com/Brosi-Lab/FINAL-snowmelt-seeds as a "model" of how to do this
-* you MUST name all code chunks with a unique name in order for your Rmarkdown file to knit to a report
-
-## workspace / environment philosophy
-
-while you should *eventually* delete the text in this section from your report, I suggest that you keep it around while you are coding, as a reminder to keep things streamlined and clean. Once an analysis gets to the very final stages (and assuming you have a clean workspace at that point!) you can delete.
-
-* one bit of analysis philosophy is keeping a clean workspace / environment
-    + if you save every temporary variable, model object, subsetted dataset, etc., your workspace will get really cluttered and personally I find it difficult to keep track of where things came from (e.g., what dataset is `community-data-4` and how does it differ from `community-data-5` or `community-data-2`?)
-    + thus almost every code chunk has a line for cleanup at the end
-    + think about cleanup at the end of every chunk, and keep updating the cleaning!
-    + keep an eye on the "Environment" tab in RStudio---if it isn't pretty streamlined, you need to pay more attention to this
-* typically I strive to having one overall "master" dataset and sometimes one dataset per major group of analyses
-    + I almost always remove other components: model ojects, plot objects, etc. etc. unless they are needed downstream in the analysis
-    + even then, once they are no longer needed downstream, I will typically remove after they have served their purpose
-* one exception to this is that it can be (very) annoying to have to re-run everything above, say, a particular code chunk to get that code chunk to work again, if you delete some of the previous objects or objects you create in that chunk
-    + thus, I often comment out the cleanup section while I am working on a particular chunk
-    + but once it is working to my satisfaction, I will un-comment it to execute the cleanup
-
-**Eventually, you will want to delete all of the text above this in your actual .Rmd file.**
-
----
-
-# Overview
-
-give context to your project here. while you don't have to go overboard, it is important to lay out what the questions are that you are answering, where the data come from, and the basic approach you will be taking to the analysis. Don't skimp.
-
-# Package Loading and Management
-
-## package loading
-
-* it is good practice to have a single code chunk at the top of your file that loads ALL packages used anywhere in the analysis. That way, if someone else is trying to replicate your code, they will not get part of the way through and realize they are missing a needed package.
-* it is also good practice to refer to uncommon packages needed for code to run, in the place *where* that code is implemented
-    + this is not particularly important for commonly-used packages like `ggplot2` and (much) more important for less-used packages
-* a minor pet peeve of mine is the package startup messages that can massively clutter up Rmarkdown reports
-    + I include `message = F, results = F, warning = F` in the code chunk header to get rid of those...
-    + but pay attention to the messages in case there are important warnings or errors; they will appear in this window when the code chunk is run, though not in the .html report
-    + a perhaps better alternative to just paying attention is included here, using the `evaluate` package which allows for saving of messages arising from whatever process you specify (including package loading) and then printing them at the end of the report, along with `sessionInfo`; this keeps your report clean and streamlined, while preserving that information which can be useful for troubleshooting (though typically that is rare)
-* the code in the chunk below allows you to:
-    + make a list of all the packages you want / need for your Rmarkdown file
-    + load the packages in a single line of code
-* I suggest always including the `tidyverse` and `knitr` packages at a minimum
-    + if you load `tidyverse` you don't have to load its subcomponents (`ggplot2`, `dplyr`, `stringr`, etc.)
-    + I have also included a few other packages that we often use in this list
-    + however, you should remove any packages from this list that you don't actually use!!
-* usually, I don't have any text above the code chunk for package loading as it is self explanatory
-    + however, if you are loading non-standard packages directly from GitHub or another non-CRAN source, you may want to include a note about it
-    
-## Package management using `renv`
-
-* package conflicts are one source of non-reproducibility, as well as future issues and collaborator conflicts with your code
-    + if you are using one version of a package, say, and a collaborator is using another, you may get different results or code may not function
-    + if anyone (including yourself) goes back to an analysis file you had set up previously, and some of the packages have been updated in the meanwhile, it may not work or may generate different results
-* one straightforward way to manage packages is with the `renv` package
-    + more at https://rstudio.github.io/renv/articles/renv.html 
-    + when you initialize `renv` with your project, it creates a "snapshot" of the *exact versions of packages* that you are using
-    + because CRAN is an archive, it includes *pointers* to those exact package versions on CRAN, rather than storing the entire packages along with the project
-    + a version of each exact package is stored on your local machine (but they have to be anyway for your code to function)
-* **workflow is easy** in `renv` (I promise!)
-    + initialize your project once and only once using `renv::init()`
-    + anytime any packages are added or removed, call `renv::snapshot()` to update the "lockfile" of which packages `renv` is managing
-    + most of the time, that is all you will need to do!
-    + if you do run into package conflicts / issues, you can call `renv::restore()` to go back to the set of packages and versions that you previously were using
-* to change your mind about `renv`... (usually not an issue, just in case)
-    + if you were playing around with `renv` and run into errors / problems related to `renv` itself (e.g., you initialize a project but then accidentally delete the lockfile, etc.), you can stop `renv` from managing your packages in a project by calling `renv::deactivate()`
-    + if you deactivate `renv` from a project, but you've still kept the lockfile etc., you can reactivate it as well via `renv::activate()` 
+In brief, our intervention will be defined in two ways: (1) People living in neighborhoods with the improved piped water network and (2) individuals who have a household connection to an improved water supply. We have water quality and access data from 548 households x 5 timepoints. Water quality will be defined by presence of *E. coli* (primary outcome), total coliforms, free and total chlorine, pressure, and enteropathogen data (from a subset of 100 households). Water access will be defined by the HWISE score, more information can be found here: https://www.ipr.northwestern.edu/wise-scales/measure-water-insecurity/. 
 
 
 ```{r packages, message = F, results = F, warning = F}
-
-# IF USING RENV TO MANAGE PACKAGES (recommended)
-# make sure `renv` package is installed: `install.packages("renv")`
-# once and only once, call:
-# renv::init()
-# once that is done, delete the code on this line and above
-# (delete the above code if not using `renv`)
-
 # CREATE PACKAGE LIST:
-# (ADD / delete the packages you need / don't below!)
-Packages <- c("tidyverse", "knitr", "kableExtra", "glmmTMB", "broom.mixed",
-              "car", "evaluate") 
+Packages <- c("tidyverse", "knitr", "kableExtra") 
 
 # LOAD PACKAGES:
 lapply(Packages, library, character.only = TRUE)
 
 # SUPPRESS UNHELPFUL `dplyr` MESSAGES: 
 options(dplyr.summarise.inform = FALSE)
-
-# SAVE PACKAGE WARNING MESSAGES
-# this saves messages associated with package loading; display at the end
-# `evaluate` package
-package.loading.messages = evaluate(lapply(Packages, library, character.only = TRUE))
-
-# # SNAPHOT packages for `renv`
-# # if using renv, then run the line of code below whenever packages change
-# # ...but ONLY after making sure that the code is running and packages are
-# # playing nicely with one another
-# renv::snapshot() # leave this commented out, run as needed
-
-# # RESTORE packages using `renv`
-# # only use this if you have added new packages or changed package versions
-# # and your code is now not working
-# renv::restore() # leave this commented out, only use if needed (rare)
-
-# # DEACTIVATE / ACTIVATE `renv`
-# if you need to deactivate `renv` from your project:
-# renv::deactivate() # leave this commented out, only use if needed (rare)
-# if you want to re-activate `renv`:
-# renv::activate() # leave this commented out, only use if needed (rare)
-
-# (delete code relating to snapshot / restore / deactivate if not using `renv`)
 
 ```
 
