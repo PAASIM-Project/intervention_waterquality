@@ -18,10 +18,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-# Load packages for analysis 
-
-# Import dataset
 ```
 
 # Introduction
@@ -47,9 +43,6 @@ options(dplyr.summarise.inform = FALSE)
 
 ```
 
-<!-- keep the code below; it prints the packages you used in the Rmarkdown report -->
-<!-- but you probably want to delete these comments :) -->
-
 **Packages used:**
 
 `r Packages`
@@ -63,9 +56,7 @@ options(dplyr.summarise.inform = FALSE)
     + copy each dataset to be input into the `data-in` subfolder in your repository
     + your input data should never be anywhere else in the project
     + **NEVER EVER** use an absolute file path (e.g., `C:/Windows/Bobsdirectory/dataset1.csv`) anywhere, but they are most common in data import code
-    + instead, **ALWAYS** use a relative file path, typically `read.csv("data-in/mydata")` if the name of the data file you added was "mydata"---but always leaving the `data-in/` prefix in the path
-    + repeat in the code chunk below for every dataset you will be importing for your analysis
-* in general, try to avoid ever setting the working directory (`setwd()`)---if you are using an R project, then it will set the working directory for you, and you can specify subfolders in the line of code where you are reading from or writing to them
+    + instead, **ALWAYS** use a relative file path, typically `read.csv("data-in/mydata")` if the name of the data file you added was "mydata"---but always leaving the `data-in/` prefix in the paths
 
 Once you have imported your data:
 
@@ -75,21 +66,11 @@ Once you have imported your data:
     + still, I usually delete these lines of code just to keep things clean and streamlined
 
 
-```{r data import, eval = F}
-
-# FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
-
-# start by removing the `Packages` variable from your environment
-# (you can't do this in the code chunk above because you display the list
-# of package names after that chunk)
+```{r data import}
+# Remove the `Packages` variable from your environment
 rm(Packages)
 
-# this is where you import your data
-# change as needed with your data names
-mydat <- read.csv("data-in/mydat.csv")
-myotherdat <- read.csv("data-in/myotherdat.csv")
-
-# repeat the above for each dataset to be imported
+data <- read.csv("data-in/mydat.csv")
 
 # # do some simple exploration here to make sure your data are as expected
 # # keep it commented out, so as to keep your report uncluttered
@@ -98,9 +79,6 @@ myotherdat <- read.csv("data-in/myotherdat.csv")
 # View(mydat)
 # you are welcome / encouraged to delete that code after having
 # done some basic checks on your data
-
-# cleanup
-# typically you won't have anything else to clean up here, but just in case...
 
 ```
 
@@ -131,17 +109,17 @@ If there are columns in a dataset that are never used, my preference is to delet
 
 ```
 
-# Analysis 
+# Analysis Outline
 
-Give an overview / roadmap here of what the various big-picture analyses are, e.g.:
+I briefly describe an outline of the planned analyses below: 
 
-* analysis 1 covers this aspect of the project
-* analysis 2 covers this other thing
-* analysis 3 addresses something different... 
-
-sometimes it can be helpful to give a little bit of information on the philosophy behind your analysis choice. E.g., "an alternative way to analyze these data would be to instead do Y; we chose to do X because of reason 1, reason 2, and reason 3... "
-
-Though if that philosophy is specific to particular analysis components, include only in the components where it is relevant.
+* Table 1: Baseline differences in covariates of interest (neighborhood-level)
+* Table 2: Baseline differences in covariates of interest (household-level)
+* Table 3: Univariate analysis of water quality and access (neighborhood-level)
+* Table 4: Univariate analysis of water quality and access (household-level)
+* Table 5: Multivariate modeling of neighborhood-level intervention status and water quality and access 
+* Table 6: Multivariate modeling of household-level intervention status and water quality and access 
+* Figure 1: Visualization of model results (primary outcome *E. coli*)
 
 ## Data overview
 
