@@ -20,8 +20,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-adding this text for a test 
-
 # Introduction
 
 **Aim 1**: to test how the provision of an improved piped water network impacts water access and quality. 
