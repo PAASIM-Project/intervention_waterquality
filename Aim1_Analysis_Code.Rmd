@@ -76,14 +76,14 @@ ADD TEXT HERE ON WHAT I DO TO THE DATA BELOW AND WHY
 ```{r data formatting}
 # Create new dataset with important variables of interest using dplyr::select()
 
-# Create false intervention variable (will be deleted after unblinding )
+# Create false intervention variable (will be deleted after unblinding)
 
 # cleanup
 # (always clean up after yourself)
 
 ```
 
-# Analysis Outline
+# Analysis
 
 I briefly describe an outline of the planned analyses below: 
 
@@ -96,8 +96,6 @@ I briefly describe an outline of the planned analyses below:
 * Figure 2: Visualization of model results (primary outcome *E. coli*)
 
 ## Data overview
-
-In most of the empirically focused papers we write, the Results section starts off with a short subsection usually entitled something like "overview". Thus, it's good to have some code here that does basic calculations of things like how many samples you collected, how many species of plants and pollinators, how many interactions, how many seeds you counted, etc.
 
 In this context, I think it is helpful to put **in-line code** into the **text** section of the report (i.e., not in a chunk) so that the results can be, well, contextualized. For example, we could report on the mean sepal width in the `iris` dataframe that is included with R:
 
@@ -128,92 +126,60 @@ plants.per.treat = masterdat %>% group_by(plot.treat) %>%
 
 ```
 
-## Analysis component 1
+## Table 1 - Baseline differences in covariates of interest (neighborhood-level)
 
-Now we move on to the actual data analyses...
+```{r table 1}
 
-* it is **really important** to give detailed context to each analysis chunk; for example:
-    + what does this chunk do?
-    + why this particular analysis?
-    + what question is it answering?
-    + what are the specifics involved, e.g. specification of random effects, other components like zero-inflation, etc.
-* if you found information online that helped you with the analysis, I strongly suggest including links to it here; likewise, if you were following the analysis in a paper, I would include that here as well
-* It is also **critically important** to edit this information as your analysis is changed / updated
-* a minor point is to consider the use of `suppressWarnings()` if one or more operations in your code is generating warning messages that are not particularly helpful and which are cluttering up your report
-    + BUT: if the warnings are helpful or potentially important, don't do that!
-    + as noted above, you can also do this with `warnings = F` in the code chunk header
+# Formatting
 
-In addition, for many if not most analyses, we typically have to do a little bit of additional formatting that isn't in the "data formatting" section above. That is perfectly reasonable and often makes the report easier to follow logically. If you are doing that, however, please be sure to include a little bit of text outlining the formatting changes to be made here.
+# Data Analysis
 
-```{r analysis component 1, eval = F}
-
-# FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
-
-# put any code related to data formatting for an analysis here
-
-# this is where you would put your analysis code
-
-# STREAMLINE MODEL RESULTS
-# (for models including categorical factors with many levels...
-# ...especially if there are interaction terms,
-# we typically simplify model results using the
-# `Anova` function from the `car` package)
-aov.my.model = Anova(my.model)
-
-# DISPLAY MODEL RESULTS
-aov.my.model
-
-# SAVE MODEL RESULTS (often but not always want to do this)
-# this is in addition to displaying them in the Rmarkdown report
-# for mixed-effects models, the `broom.mixed` package is very helpful for that:
-out.aov.my.model = tidy(out.aov.my.model)
-write.csv(out.aov.my.model, file = "results/my-model-results.csv")
-# **IMPORTANT:** note the "results/" at the start of the file path, 
-# which saves the output into the "results" folder in our project (key!)
-
-# CLEANUP
-# if there are temporary variables, etc. that were generated in this chunk,
-# remove them here, e.g. the objects created by `broom.mixed`:
-# (uncomment out the one line of code below, alter as needed)
-rm(aov.my.model, out.aov.my.model)
-# ...but don't remove your model objects yet, because you need to do model
-# assessment on them (next code chunk)
+# Cleanup
+# rm(insert removable objects here)
 
 ```
 
-* after each analysis, **it is really (really) important** to include some text about what the results mean
-* discuss *directionality* of results, not just whether or not differences are significant; and also ideally effect sizes
-* ideally for each analysis, plots and analyses are done near to one another
-    + in contrast to doing all the analyses, then all the plots separately
+## Table 2 - Baseline differences in covariates of interest (household-level)
 
-### you can potentially break analyses down into subcomponents with headers
+```{r}
+# Formatting
 
-breaking an analysis down into smaller bits makes sense for many analyses... 
+# Data Analysis
 
-```{r analysis 1 subcomponent 1}
+# Cleanup
+# rm(insert removable objects here)
+```
 
-# this is where you would put your analysis code
+## Table 3 - Univariate association between intervention with water quality and access  (neighborhood-level)
+```{r}
+# Formatting
 
-# see code chunk above for more specifics!!
+# Data Analysis 
 
-# cleanup
-# (always clean up after yourself)
+# Cleanup
+# rm(insert removable objects here)
+```
+
+## Table 4 - Univariate association between intervention with water quality and access (household-level)
+```{r}
+# Formatting
+
+# Data Analysis 
+
+# Cleanup
+# rm(insert removable objects here)
+```
+
+## Table 5 - Multivariate association between intervention with water quality and access (neighborhood-level)
+
+### Model Construction (Table 5)
+```{r model construction table 5}
 
 ```
 
-...but remember for each of those bits to **put some text here** to give some context about the results!
+### Model Validation (Table 5)
 
-### model validation, analysis 1
-
-ALWAYS include data validation: do your data meet the assumptions of the models you are running? It's good to include just a bit of text here about your validation, but typically it is very brief.
-
-If you ran an analysis two or more alternative ways, you may wish to split the validation component into multiple chunks. Remember to include some explanatory text, usually before and *always* after each chunk, even if very brief.
-
-```{r model validation analysis 1, eval = F}
-
-# FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
-
-# this is where you would put your code for model validation / assessment
+```{r model validation table 5}
 
 # (for GLMMs, we typically use the `DHARMa` package for this, e.g.
 # replace "my.model" with the name of the model you are assessing
@@ -230,27 +196,8 @@ rm(sim.out.my.model)
 
 ```
 
-as always, remember for each of those bits to **put some text here** to give some context about the validation results! Just showing a validation plot without any context is unhelpful. Tell the reader / your future self *why* your plot (or other result) is consistent (or not!) with model assumptions.
-
-### plots analysis 1
-
-* I strongly prefer to have plots associated with each analysis, near each analysis in the Rmarkdown document (as opposed, e.g., to putting all of the analyses together at the end)
-    + I think it makes it easier to read / interpret the analysis report, but also makes it easier to code.
-* give just a bit of brief context for each plot, before the code chunk in which you execute the plot
-* when saving plots, **be sure to save them in the `plots` subfolder** (see code in the chunk below)
-
-**saving plots and** `.gitignore`
-
-* this project has been set up with the `plots/` subfolder included in `.gitignore`
-* thus, any plots you save as part of the project (assuming you save them in the `plots/` subfolder, as you always should!) will be saved on your local computer, but not on GitHub
-    + the rationale behind this is that Git does not do well with versioning binary files like image files / .pdfs / Word & Excel docs; thus it is re-writing the *entire* file every time it gets updated, even with a tiny change
-* you should display at least the key plots in your .Rmarkdown report, so they will be viewable by anyone checking out the project
-    + if anyone wants to generate the exact saved plots (i.e. the graphics files) that are in the `plots/` subfolder, the code should be set up to be reproducible so that should be straightforward
-
-
-```{r plot analysis 1, eval = F}
-
-# FIRST THING: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
+### Plots (Table 5) 
+```{r plot table 5}
 
 # any data preparation / summarization needed for plotting
 # code below is just a placeholder!
@@ -276,25 +223,60 @@ rm(myplotdata, myplot)
 
 ```
 
-you may wish to include some brief text here, e.g., "this plot shows the negative overall effect of potassium cyanide exposure on bee survival, underscoring our statistical results"
+## Table 6 - Multivariate association between intervention with water quality and access (household-level)
 
-## Analysis 2
+### Model Construction (Table 6)
+```{r model construction table 6}
 
-Repeat as needed for each analysis component (analysis 2, 3...). remember to include:
+```
 
-* analysis chunk(s)---that's the easy part
-* model validation
-* plots associated with each analysis
+### Model Validation (Table 6)
 
-These should all occur together, to keep the overall analysis report easy to read and understand.
+```{r model validation table 6}
 
-**IMPORTANT**---always remember to check that every code chunk has a unique name, otherwise your Rmarkdown report will not knit. This is particularly important when copying and pasting code chunks.
+# (for GLMMs, we typically use the `DHARMa` package for this, e.g.
+# replace "my.model" with the name of the model you are assessing
+# and probably change the name "sim.out.my.model" to something more descriptive)
+# simulate residuals using DHARMa:
+sim.out.my.model <- simulateResiduals(fittedModel = my.model, plot = F)
+plot(sim.out.my.model) # plot residual plots
+testDispersion(sim.out.my.model, plot = F) # print dispersion results
+testZeroInflation(sim.out.my.model, plot = F) # print zero-inflation results
 
-# Session Info and Package Loading Messages
+# CLEANUP
+# again, remove anything that isn't subsequently used in the analysis
+rm(sim.out.my.model)
 
-`sessionInfo` is key (though minimally) for reproducibility---replicate the code chunk below exactly
+```
 
-before `sessionInfo` we print the messages associated with package loading, using the `replay` function from the `evaluate` package. We do this at the end to make the report more readable, such that readers do not have to wade through long lists of (typically) not-very-helpful messages. But for troubleshooting those messages can be important, so they are listed here.
+### Plots (Table 6) 
+```{r plot table 6}
+
+# any data preparation / summarization needed for plotting
+# code below is just a placeholder!
+myplotdata = mydata %>% group_by(mygroupingvar1, mygroupingvar1) %>% 
+  summarize(mean = mean(), stdev = sd()...) 
+
+# create the actual plot (almost always using `ggplot2`)
+myplot = ggplot(myplotdata, ...)
+
+# DISPLAY the plot in your Rmarkdown report 
+# (usually just a single line of code, 
+# the name of the ggplot object you created above)
+myplot
+
+# SAVE PLOT
+# example, but key thing is the `plots/` prefix in the file path
+ggsave(myplot, file = "plots/myplot.pdf", width = 5, height = 3)
+
+# # CLEANUP
+# # remember to also clean up any objects such as data summarizations
+# # set up for your plotting, e.g.:
+rm(myplotdata, myplot)
+
+```
+
+# Session Info
 
 ```{r Session Info}
 sessionInfo()
