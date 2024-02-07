@@ -71,12 +71,13 @@ data <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/L
 
 ## Data Formatting
 
-ADD TEXT HERE ON WHAT I DO TO THE DATA BELOW AND WHY 
+I filtered the master dataset to only the variables that will be used in this analysis. I rename variables to assist with downstream analysis. I also include code for creating a fake intervention arm/variable to use in the analysis. When we are ready to unblind, I will delete this text and the code for the false intervention variable and will update the input data file to the unblinded dataset. 
 
 ```{r data formatting}
 # Create new dataset with variables used in this analysis
 data_filt <- data %>%
-  select(main_id, visit, SES_score, high_poverty, san_basic_obs, fixed_emp_pri, secondary_complete, num_lt5, num_HH, months_in_hh, human_feces, animal_feces, HFIAS_score, HFIA_category, HW_dwell, season_rainy, flooding_HH_yard, ecolimpn_source, ecolimpn_stored, coliformmpn_source, coliformmpn_stored, water_service_ladder, improved_water, C_21, C_22, C_17, C_20, C_19, C_28_A1, C_28_A2, A_W_9, JMP_H2, C_4, C_23, C_18, O_W_7, O_W_8, C_12, LT30min, timeperweek, flow_rate, C_24, C_25, HWISE_scale, HWISE_insecure, M_1B, C_15_D, C_31)
+  select(main_id, visit, neighborhood, SES_score, high_poverty, san_basic_obs, fixed_emp_pri, secondary_complete, num_lt5, num_HH, months_in_hh, human_feces, animal_feces, HFIAS_score, HFIA_category, HW_dwell, season_rainy, flooding_HH_yard, ecolimpn_source, ecolimpn_stored, coliformmpn_source, coliformmpn_stored, C_10, water_service_ladder, improved_water, C_21, C_22, C_17, C_20, C_19, C_28_A1, C_28_A2, A_W_9, JMP_H2, C_4, C_23, C_18, O_W_7, O_W_8, C_12, LT30min, timeperweek, flow_rate, C_24, C_25, HWISE_scale, HWISE_insecure, M_1B, C_15_D, C_31) %>%
+  rename(water_source = C_10, sat_color_appear = C_21, sat_taste_smell = C_22, sat_service = C_17, sat_pressure = C_20, sat_avail = C_19, storage_tank = C_28_A1, water_storage = A_W_9, water_HW = JMP_H2, share_FIPAG = C_4, sufficient_quant = C_23, sat_afford = C_18, free_chlor = O_W_7, total_chlor = O_W_8, collect_contin = C_12, avail_hr = C_24, avail_day = C_25, use_meter = M_1B, use_respond = C_15_D, child_consump = C_31)
 
 # Create false intervention variable (will be deleted after unblinding)
 
