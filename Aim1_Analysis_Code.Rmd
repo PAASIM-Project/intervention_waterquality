@@ -74,7 +74,9 @@ data <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/L
 ADD TEXT HERE ON WHAT I DO TO THE DATA BELOW AND WHY 
 
 ```{r data formatting}
-# Create new dataset with important variables of interest using dplyr::select()
+# Create new dataset with variables used in this analysis
+data_filt <- data %>%
+  select(main_id, visit, SES_score, high_poverty, san_basic_obs, fixed_emp_pri, secondary_complete, num_lt5, num_HH, months_in_hh, human_feces, animal_feces, HFIAS_score, HFIA_category, HW_dwell, season_rainy, flooding_HH_yard, ecolimpn_source, ecolimpn_stored, coliformmpn_source, coliformmpn_stored, water_service_ladder, improved_water, C_21, C_22, C_17, C_20, C_19, C_28_A1, C_28_A2, A_W_9, JMP_H2, C_4, C_23, C_18, O_W_7, O_W_8, C_12, LT30min, timeperweek, flow_rate, C_24, C_25, HWISE_scale, HWISE_insecure, M_1B, C_15_D, C_31)
 
 # Create false intervention variable (will be deleted after unblinding)
 
