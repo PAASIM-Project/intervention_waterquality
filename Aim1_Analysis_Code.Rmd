@@ -80,10 +80,12 @@ data_filt <- data %>%
   rename(water_source = C_10, sat_color_appear = C_21, sat_taste_smell = C_22, sat_service = C_17, sat_pressure = C_20, sat_avail = C_19, storage_tank = C_28_A1, water_storage = A_W_9, water_HW = JMP_H2, share_FIPAG = C_4, sufficient_quant = C_23, sat_afford = C_18, free_chlor = O_W_7, total_chlor = O_W_8, collect_contin = C_12, avail_hr = C_24, avail_day = C_25, use_meter = M_1B, use_respond = C_15_D, child_consump = C_31)
 
 # Create false intervention variable (will be deleted after unblinding)
+matching_fake_arm <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/Levy, Karen - 1. PAASIM/3. Data and Analysis/Data/Blinded dataset/matching_fake_arm.xlsx")
 
+all_data <- merge(matching_fake_arm, data_filt, by = "code", all = TRUE)
 
 # cleanup
-# (always clean up after yourself)
+rm(data_filt, data, matching_fake_arm)
 
 ```
 
@@ -109,7 +111,7 @@ In this context, I think it is helpful to put **in-line code** into the **text**
 
 Sometimes it makes sense to include a code chunk (i.e., not just inline code) here, if needed to make more complex calculations; anything more than a couple of operations is typically best left to a code chunk, and can then be reported on in the text below the code chunk. The chunk below includes code from Loy et al.'s accelerated snowmelt and seed production analysis; the lines of codes included outside of the chunk (in the default Rmarkdown text) are repeated within the chunk (but commented out and thus not evaluated in the chunk). While this is by definition repetitive, it makes it easy for a reader of the Rmarkdown report to see how the calculations were conducted, without having to separately open the .Rmd file.
 
-```{r data overview, eval = F}
+```{r data overview}
 
 # FIRST THING if altering: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
 
@@ -137,6 +139,7 @@ plants.per.treat = masterdat %>% group_by(plot.treat) %>%
 ```{r table 1}
 
 # Formatting
+
 
 # Data Analysis
 
