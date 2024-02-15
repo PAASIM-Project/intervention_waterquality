@@ -18,6 +18,18 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+# rm(list = ls())
+
+# Writing custom functions to render any table contents for continuous and categorical vars - keep these for any tables throughout
+my.render.cont <- function(x) {
+    with(stats.apply.rounding(stats.default(x), digits=2), c("",
+        "Mean (SD)"=sprintf("%s (&plusmn; %s)", MEAN, SD)))
+}
+my.render.cat <- function(x) {
+    c("", sapply(stats.default(x), function(y) with(y,
+        sprintf("%d (%0.0f %%)", FREQ, PCT))))
+}
+
 ```
 
 # Introduction
@@ -30,7 +42,7 @@ The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à �
 
 ```{r packages, message = F, results = F, warning = F}
 # CREATE PACKAGE LIST:
-Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate") 
+Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate", "boot") 
 
 # LOAD PACKAGES:
 lapply(Packages, library, character.only = TRUE)
@@ -71,12 +83,15 @@ data <- read_excel("../../../../../../OneDrive-SharedLibraries-EmoryUniversity/L
 
 ## Data Formatting
 
-I filtered the master dataset to only the variables that will be used in this analysis. I rename variables to assist with downstream analysis. I also include code for creating a fake intervention arm/variable to use in the analysis. When we are ready to unblind, I will delete this text and the code for the false intervention variable and will update the input data file to the unblinded dataset. 
+I filtered the master dataset to only the variables that will be used in this analysis and only to visits from households that have completed the study (study_complete). I rename variables to assist with downstream analysis. I also include code for creating a fake intervention arm/variable to use in the analysis. When we are ready to unblind, I will delete this text and the code for the false intervention variable and will update the input data file to the unblinded dataset. 
+
+I will use visit = 1 to create all baseline variables. I dropped visit = 0 as these were only if the mother wasn't 31 weeks pregnant. These data were just used to plan future enrollment visits. 
 
 ```{r data formatting}
 # Create new dataset with variables used in this analysis
 data_filt <- data %>%
-  select(main_id, visit, neighborhood, code, SES_score, high_poverty, san_basic_obs, fixed_emp_pri, secondary_complete, num_lt5, num_HH, months_in_hh, human_feces, animal_feces, HFIAS_score, HFIA_category, HW_dwell, season_rainy, flooding_HH_yard, ecolimpn_source, ecolimpn_stored, coliformmpn_source, coliformmpn_stored, C_10, water_service_ladder, improved_water, C_21, C_22, C_17, C_20, C_19, C_28_A1, C_28_A2, A_W_9, JMP_H2, C_4, C_23, C_18, O_W_7, O_W_8, C_12, LT30min, timeperweek, flow_rate, C_24, C_25, HWISE_scale, HWISE_insecure, M_1B, C_15_D, C_31, sub_SES_score, sub_density, sub_SES_tertile, sub_density_tertile, sub_density_strata) %>%
+  filter(study_complete == 1 & visit != 0) %>%
+  select(main_id, visit, neighborhood, code, SES_score, high_poverty, san_basic_obs, fixed_emp_pri, secondary_complete, num_lt5, num_HH, months_in_hh, human_feces, animal_feces, HFIAS_score, HFIA_category, HW_dwell, season_rainy, flooding_HH_yard, ecolimpn_source, ecolimpn_stored, coliformmpn_source, coliformmpn_stored, C_10, water_service_ladder, improved_water, C_21, C_22, C_17, C_20, C_19, C_28_A1, C_28_A2, A_W_9, JMP_H2, C_4, C_23, C_18, O_W_7, O_W_8, C_12, LT30min, timeperweek, flow_rate, C_24, C_25, HWISE_scale, HWISE_insecure, M_1B, C_15_D, C_31, sub_SES_score, sub_density, sub_SES_tertile, sub_density_tertile, sub_density_strata, SES_score_bl) %>%
   rename(water_source = C_10, sat_color_appear = C_21, sat_taste_smell = C_22, sat_service = C_17, sat_pressure = C_20, sat_avail = C_19, storage_tank = C_28_A1, water_storage = A_W_9, water_HW = JMP_H2, share_FIPAG = C_4, sufficient_quant = C_23, sat_afford = C_18, free_chlor = O_W_7, total_chlor = O_W_8, collect_contin = C_12, avail_hr = C_24, avail_day = C_25, use_meter = M_1B, use_respond = C_15_D, child_consump = C_31)
 
 # Create false intervention variable (will be deleted after unblinding)
@@ -84,9 +99,54 @@ matching_fake_arm <- read_excel("../../../../../../OneDrive-SharedLibraries-Emor
 
 all_data <- merge(matching_fake_arm, data_filt, by = "code", all = TRUE)
 
+# Checking visit numbers - there should be 642 for each visit
+table(all_data$visit)
+
 # cleanup
 rm(data_filt, data, matching_fake_arm)
 
+# Water storage 
+table(all_data$water_storage)
+
+# Water available at HW facility
+table(all_data$water_HW)
+
+# Sharing of drinking water connection 
+table(all_data$share_FIPAG)
+
+# Sufficient quantity of drinking water 
+table(all_data$sufficient_quant)
+
+# Distance of HH to water main 
+
+
+# Distance of HH to drinking water source 
+
+
+# Time to collect water (min)
+summary(all_data$collect_contin)
+
+# Piped water flow rate (L/min)
+options(digits = 4)
+summary(all_data$flow_rate) 
+
+# Availability (hrs/day)
+summary(all_data$avail_hr)
+
+# Availability (days/week)
+summary(all_data$avail_day)
+
+# Water insecure households 
+table(all_data$HWISE_insecure)
+
+# Water usage (L/day) - meter
+summary(all_data$use_meter)
+
+# Water usage (L/day) - respondent 
+summary(all_data$use_respond)
+
+# Child consumption of drinking water source 
+table(all_data$child_consump)
 ```
 
 # Analysis
@@ -105,41 +165,16 @@ I briefly describe an outline of the planned analyses below. First, I will impor
 
 ## Data overview
 
-In this context, I think it is helpful to put **in-line code** into the **text** section of the report (i.e., not in a chunk) so that the results can be, well, contextualized. For example, we could report on the mean sepal width in the `iris` dataframe that is included with R:
-
-* mean sepal width in the `iris` dataframe: `r mean(iris$Sepal.Width)`
-
-Sometimes it makes sense to include a code chunk (i.e., not just inline code) here, if needed to make more complex calculations; anything more than a couple of operations is typically best left to a code chunk, and can then be reported on in the text below the code chunk. The chunk below includes code from Loy et al.'s accelerated snowmelt and seed production analysis; the lines of codes included outside of the chunk (in the default Rmarkdown text) are repeated within the chunk (but commented out and thus not evaluated in the chunk). While this is by definition repetitive, it makes it easy for a reader of the Rmarkdown report to see how the calculations were conducted, without having to separately open the .Rmd file.
-
-```{r data overview}
-
-# FIRST THING if altering: CHANGE CODE CHUNK HEADER TO REMOVE `eval = F`!
-
-# this code is just an example of one way this could be done; change to best suit the purposes of your project.
-
-# most of this is displayed in text below the code chunk
-
-# Number of plants
-# * `r nrow(masterdat)` plants
-
-# Number of plants per treatment
-plants.per.treat = masterdat %>% group_by(plot.treat) %>%
-  summarise(no_rows = length(plot.treat))
-    # + `r as.numeric(plants.per.treat[2,2])` plants in control plots
-    # + `r as.numeric(plants.per.treat[1,2])` plants in snowmelt-accelerated plots
-
-# Total number of seeds
-# * `r as.integer(sum(masterdat$totalseeds))` total seeds
-# "as.integer" makes it so that it does not display in scientific notation
-
-```
 
 ## Table 1 - Baseline differences in covariates of interest (neighborhood-level)
+
+Question - clarify with Josh that this table needs to be included because we are matching on the neighborhood-level characteristics so those vars would already be in the model
 
 ```{r table 1}
 
 # Formatting
-
+data_visit1 <- all_data %>%
+  filter(visit == 1)
 
 # Data Analysis
 
@@ -152,11 +187,76 @@ plants.per.treat = masterdat %>% group_by(plot.treat) %>%
 
 ```{r}
 # Formatting
+data_visit1$san_basic_obs <- 
+  factor(data_visit1$san_basic_obs, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$fixed_emp_pri <- 
+  factor(data_visit1$fixed_emp_pri, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$human_feces <- 
+  factor(data_visit1$human_feces, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$animal_feces <- 
+  factor(data_visit1$animal_feces, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$HFIA_category <- 
+  factor(data_visit1$HFIA_category, levels=c(1,2,3,4),
+         labels=c("Food secure", 
+                  "Mildly food insecure",
+                  "Moderately food insecure",
+                  "Severely food insecure"))
+
+data_visit1$HW_dwell <- 
+  factor(data_visit1$HW_dwell, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$season_rainy <- 
+  factor(data_visit1$season_rainy, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$flooding_HH_yard <- 
+  factor(data_visit1$flooding_HH_yard, levels=c(1,0),
+         labels=c("Yes", 
+                  "No"))
+
+data_visit1$fakearm <- 
+  factor(data_visit1$fakearm, levels=c(1,0),
+         labels=c("Yes", 
+                  "Control"))
+
+# Labeling vars - can edit this code later to make this code shorter 
+label(data_visit1$SES_score) <- "SES Score"
+label(data_visit1$num_lt5) <- "Number of children under 5 in household"
+label(data_visit1$num_HH) <- "Number of people in household"
+label(data_visit1$months_in_hh) <- "Months living in household"
+label(data_visit1$san_basic_obs) <- "Basic sanitation access"
+label(data_visit1$fixed_emp_pri) <- "Fixed employment status of primary wage earner"
+label(data_visit1$human_feces) <- "Observed human feces in or near the household"
+label(data_visit1$animal_feces) <- "Observed animal feces in or near the household"
+label(data_visit1$HFIA_category) <- "Household Food Insecurity Access Scale (categorized)"
+label(data_visit1$HW_dwell) <- "Handwashing station (with soap and water) in house or yard"
+label(data_visit1$season_rainy) <- "Rainy season (Dec-Apr)"
+label(data_visit1$flooding_HH_yard) <- "Any flooding in household or yard in the last month"
+label(data_visit1$fakearm) <- "FIPAG connection at household"
+
+caption <- "Table 2. Baseline differences in covariates of interest based household-intervention status"
+# footnote <- "ᵃ example footnote here"
 
 # Data Analysis
+table1(~ SES_score + num_lt5 + num_HH + months_in_hh + san_basic_obs + fixed_emp_pri + human_feces + animal_feces + HFIA_category + HW_dwell + season_rainy + flooding_HH_yard | fakearm, data = data_visit1, overall=c(left = "Total"), caption = caption,  render.continuous=my.render.cont, render.categorical=my.render.cat) # Add in footnote = footnote if applicable
 
 # Cleanup
-# rm(insert removable objects here)
+rm(caption)
 ```
 
 ## Table 3 - Univariate association between intervention with water quality and access  (neighborhood-level)
