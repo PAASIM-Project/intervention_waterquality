@@ -42,7 +42,7 @@ The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à �
 
 ```{r packages, message = F, results = F, warning = F}
 # CREATE PACKAGE LIST:
-Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate", "boot", "table1", "broom") 
+Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate", "boot", "table1", "broom", "flextable") 
 
 # LOAD PACKAGES:
 lapply(Packages, library, character.only = TRUE)
@@ -301,25 +301,6 @@ rm(caption)
 # Formatting
 
 # Data Analysis 
-
-## Categorical Vars 
-### FIB Categorical
-### Enteropathogens (P/A) - don't have this data yet
-### Satisfied with water color and appearance
-### Satisfied with water taste and smell 
-### Satisfied with water service
-### Satisfied with water pressure 
-### Satisfied with water availability 
-### Water Storage (Y/N) 
-### Water available at handwashing facility 
-### Water available at latrine 
-### Sharing of drinking water connection 
-### Sufficient quantity of drinking water 
-### Satisfied with water affordability 
-### Child consumption of drinking water 
-### Water insecure
-### HWISE scale
-
 ## Continuous Vars
 ### Linear regression function 
 run_linear_regression <- function(data, predictor, responses) {
@@ -327,32 +308,92 @@ run_linear_regression <- function(data, predictor, responses) {
     # Fit linear regression model
     model <- lm(paste(response, "~", predictor), data = data)
     
-    # Extract coefficients
+    # Extract coefficients and compute risk ratio, p-value, and CI
     coefficients <- tidy(model)
+    coefficient <- coefficients$estimate[2]  # coefficient for the predictor
+    p_value <- tidy(model)$p.value[2]
+    conf_int <- confint(model)[2, ]
+    risk_ratio <- exp(coefficient)  # Risk ratio calculation
     
-    # Add predictor and response variable names
-    coefficients$Predictor <- predictor
-    coefficients$Response <- response
+    # Create a data frame for the result
+    result_df <- data.frame(
+      Response = response,
+      Risk_Ratio = risk_ratio,
+      P_Value = p_value,
+      CI_Lower = conf_int[1],
+      CI_Upper = conf_int[2]
+    )
     
-    return(coefficients)
+    return(result_df)
   })
   
-  # Format the results as a table
-  results_table <- results %>%
-    pivot_wider(names_from = Response, values_from = c(estimate, std.error)) %>%
-    rename_with(~paste(., "Estimate", sep = "_"), contains("estimate")) %>%
-    rename_with(~paste(., "Std. Error", sep = "_"), contains("std.error")) %>%
-    select(-term)
+  # Combine results into a single data frame
+  results_df <- do.call(rbind, results)
   
-  return(results_table)
+  return(results_df)
 }
 
-# List of continuous outcome vars- need to add distance variables (hh to water main and hh to water source)
+### List of continuous outcome vars- need to add distance variables (hh to water main and hh to water source)
 predictor <- "fakearm"
 responses <- c("ecolimpn_stored", "ecolimpn_source", "coliformmpn_stored", "coliformmpn_source", "free_chlor", "total_chlor", "collect_contin", "timeperweek", "flow_rate", "avail_hr", "avail_day", "use_meter", "use_respond")
 
-results_univariate_continuous <- run_linear_regression(all_data, predictor, responses)
-kable(results_univariate_continuous)
+results <- run_linear_regression(all_data, predictor, responses)
+results <- t(results)
+
+results_table_continuous <- kable(results, align = "lccc") %>%
+  kable_styling(full_width = FALSE) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2:5, width = "2cm") %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#0073e6")
+
+results_table_continuous
+
+
+## Categorical Vars 
+
+## Poisson regression function - model did not converge with log binomial (based on Liz/Josh's suggestion)
+run_poisson_regression_with_rr <- function(data, predictor, responses) {
+  results <- map_dfr(responses, function(response) {
+    # Fit Poisson regression model
+    model <- glm(paste(response, "~", predictor), family = poisson, data = data)
+    
+    # Extract coefficients and compute risk ratio, p-value, and CI
+    coefficients <- tidy(model)
+    coefficient <- coefficients$estimate[2]  # coefficient for the predictor
+    p_value <- coefficients$p.value[2]
+    conf_int <- confint(model)[2, ]
+    
+    # Compute risk ratio approximation
+    risk_ratio <- exp(coefficient)  # Risk ratio calculation
+    
+    # Create a data frame for the result
+    result_df <- data.frame(
+      Response = response,
+      Risk_Ratio_Approx = risk_ratio,
+      P_Value = p_value,
+      CI_Lower = conf_int[1],
+      CI_Upper = conf_int[2]
+    )
+    
+    return(result_df)
+  })
+  
+  return(results)
+}
+
+### List of categorical variables - add enteropathogens, categorical FIB, do I include sharing? what var to use for storage?
+responses <- c("sat_color_appear", "sat_taste_smell", "sat_service", "sat_pressure", "sat_avail", "water_storage", "water_HW", "sufficient_quant", "sat_afford", "HWISE_insecure", "child_consump")
+
+results <- run_poisson_regression_with_rr(all_data, predictor, responses)
+
+results_table_cat <- kable(results, align = "lccc", format = "html") %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover")) %>%
+  column_spec(1, bold = TRUE) %>%
+  column_spec(2:5, width = "2cm") %>%
+  row_spec(0, bold = TRUE, color = "black", background = "white") %>%
+  row_spec(1:nrow(results), background = "white")  # Alternate row colors
+
+results_table_cat
 
 # Cleanup
 # rm(insert removable objects here)
@@ -383,14 +424,14 @@ kable(results_univariate_continuous)
 # replace "my.model" with the name of the model you are assessing
 # and probably change the name "sim.out.my.model" to something more descriptive)
 # simulate residuals using DHARMa:
-sim.out.my.model <- simulateResiduals(fittedModel = my.model, plot = F)
-plot(sim.out.my.model) # plot residual plots
-testDispersion(sim.out.my.model, plot = F) # print dispersion results
-testZeroInflation(sim.out.my.model, plot = F) # print zero-inflation results
+#sim.out.my.model <- simulateResiduals(fittedModel = my.model, plot = F)
+#plot(sim.out.my.model) # plot residual plots
+#testDispersion(sim.out.my.model, plot = F) # print dispersion results
+#testZeroInflation(sim.out.my.model, plot = F) # print zero-inflation results
 
 # CLEANUP
 # again, remove anything that isn't subsequently used in the analysis
-rm(sim.out.my.model)
+#rm(sim.out.my.model)
 
 ```
 
@@ -399,25 +440,25 @@ rm(sim.out.my.model)
 
 # any data preparation / summarization needed for plotting
 # code below is just a placeholder!
-myplotdata = mydata %>% group_by(mygroupingvar1, mygroupingvar1) %>% 
-  summarize(mean = mean(), stdev = sd()...) 
+#myplotdata = mydata %>% group_by(mygroupingvar1, mygroupingvar1) %>% 
+ # summarize(mean = mean(), stdev = sd()...) 
 
 # create the actual plot (almost always using `ggplot2`)
-myplot = ggplot(myplotdata, ...)
+#myplot = ggplot(myplotdata, ...)
 
 # DISPLAY the plot in your Rmarkdown report 
 # (usually just a single line of code, 
 # the name of the ggplot object you created above)
-myplot
+#myplot
 
 # SAVE PLOT
 # example, but key thing is the `plots/` prefix in the file path
-ggsave(myplot, file = "plots/myplot.pdf", width = 5, height = 3)
+#ggsave(myplot, file = "plots/myplot.pdf", width = 5, height = 3)
 
 # # CLEANUP
 # # remember to also clean up any objects such as data summarizations
 # # set up for your plotting, e.g.:
-rm(myplotdata, myplot)
+#rm(myplotdata, myplot)
 
 ```
 
@@ -432,45 +473,10 @@ rm(myplotdata, myplot)
 
 ```{r model validation table 6}
 
-# (for GLMMs, we typically use the `DHARMa` package for this, e.g.
-# replace "my.model" with the name of the model you are assessing
-# and probably change the name "sim.out.my.model" to something more descriptive)
-# simulate residuals using DHARMa:
-sim.out.my.model <- simulateResiduals(fittedModel = my.model, plot = F)
-plot(sim.out.my.model) # plot residual plots
-testDispersion(sim.out.my.model, plot = F) # print dispersion results
-testZeroInflation(sim.out.my.model, plot = F) # print zero-inflation results
-
-# CLEANUP
-# again, remove anything that isn't subsequently used in the analysis
-rm(sim.out.my.model)
-
 ```
 
 ### Plots (Table 6) 
 ```{r plot table 6}
-
-# any data preparation / summarization needed for plotting
-# code below is just a placeholder!
-myplotdata = mydata %>% group_by(mygroupingvar1, mygroupingvar1) %>% 
-  summarize(mean = mean(), stdev = sd()...) 
-
-# create the actual plot (almost always using `ggplot2`)
-myplot = ggplot(myplotdata, ...)
-
-# DISPLAY the plot in your Rmarkdown report 
-# (usually just a single line of code, 
-# the name of the ggplot object you created above)
-myplot
-
-# SAVE PLOT
-# example, but key thing is the `plots/` prefix in the file path
-ggsave(myplot, file = "plots/myplot.pdf", width = 5, height = 3)
-
-# # CLEANUP
-# # remember to also clean up any objects such as data summarizations
-# # set up for your plotting, e.g.:
-rm(myplotdata, myplot)
 
 ```
 
