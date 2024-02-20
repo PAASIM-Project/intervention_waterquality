@@ -42,7 +42,7 @@ The data for this analysis comes from the PAASIM “Pesquisa sobre o Acesso à �
 
 ```{r packages, message = F, results = F, warning = F}
 # CREATE PACKAGE LIST:
-Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate", "boot") 
+Packages <- c("tidyverse", "knitr", "kableExtra", "readxl", "evaluate", "boot", "table1", "broom") 
 
 # LOAD PACKAGES:
 lapply(Packages, library, character.only = TRUE)
@@ -186,53 +186,54 @@ data_visit1 <- all_data %>%
 ## Table 2 - Baseline differences in covariates of interest (household-level)
 
 ```{r}
-# Formatting
-data_visit1$san_basic_obs <- 
-  factor(data_visit1$san_basic_obs, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+# Formatting- exclude until after we run models
 
-data_visit1$fixed_emp_pri <- 
-  factor(data_visit1$fixed_emp_pri, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$san_basic_obs <- 
+ # factor(data_visit1$san_basic_obs, levels=c(1,0),
+  #       labels=c("Yes", 
+   #               "No"))
 
-data_visit1$human_feces <- 
-  factor(data_visit1$human_feces, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$fixed_emp_pri <- 
+ # factor(data_visit1$fixed_emp_pri, levels=c(1,0),
+  #       labels=c("Yes", 
+   #               "No"))
 
-data_visit1$animal_feces <- 
-  factor(data_visit1$animal_feces, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$human_feces <- 
+ # factor(data_visit1$human_feces, levels=c(1,0),
+  #       labels=c("Yes", 
+   #               "No"))
 
-data_visit1$HFIA_category <- 
-  factor(data_visit1$HFIA_category, levels=c(1,2,3,4),
-         labels=c("Food secure", 
-                  "Mildly food insecure",
-                  "Moderately food insecure",
-                  "Severely food insecure"))
+#data_visit1$animal_feces <- 
+ # factor(data_visit1$animal_feces, levels=c(1,0),
+  #       labels=c("Yes", 
+   #               "No"))
 
-data_visit1$HW_dwell <- 
-  factor(data_visit1$HW_dwell, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$HFIA_category <- 
+ # factor(data_visit1$HFIA_category, levels=c(1,2,3,4),
+  #       labels=c("Food secure", 
+ #                 "Mildly food insecure",
+  #                "Moderately food insecure",
+   #               "Severely food insecure"))
 
-data_visit1$season_rainy <- 
-  factor(data_visit1$season_rainy, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$HW_dwell <- 
+  #factor(data_visit1$HW_dwell, levels=c(1,0),
+   #      labels=c("Yes", 
+    #              "No"))
 
-data_visit1$flooding_HH_yard <- 
-  factor(data_visit1$flooding_HH_yard, levels=c(1,0),
-         labels=c("Yes", 
-                  "No"))
+#data_visit1$season_rainy <- 
+ # factor(data_visit1$season_rainy, levels=c(1,0),
+  #       labels=c("Yes", 
+   #             "No"))
 
-data_visit1$fakearm <- 
-  factor(data_visit1$fakearm, levels=c(1,0),
-         labels=c("Yes", 
-                  "Control"))
+#data_visit1$flooding_HH_yard <- 
+ # factor(data_visit1$flooding_HH_yard, levels=c(1,0),
+  #       labels=c("Yes", 
+   #               "No"))
+
+#data_visit1$fakearm <- 
+ # factor(data_visit1$fakearm, levels=c(1,0),
+  #       labels=c("Intervention", 
+   #               "Control")) 
 
 # Labeling vars - can edit this code later to make this code shorter 
 label(data_visit1$SES_score) <- "SES Score"
@@ -253,7 +254,43 @@ caption <- "Table 2. Baseline differences in covariates of interest based househ
 # footnote <- "ᵃ example footnote here"
 
 # Data Analysis
-table1(~ SES_score + num_lt5 + num_HH + months_in_hh + san_basic_obs + fixed_emp_pri + human_feces + animal_feces + HFIA_category + HW_dwell + season_rainy + flooding_HH_yard | fakearm, data = data_visit1, overall=c(left = "Total"), caption = caption,  render.continuous=my.render.cont, render.categorical=my.render.cat) # Add in footnote = footnote if applicable
+
+# Create Table 1
+table1(~ SES_score + num_lt5 + num_HH + months_in_hh + san_basic_obs + fixed_emp_pri + human_feces + animal_feces + HFIA_category + HW_dwell + season_rainy + flooding_HH_yard | fakearm, data = data_visit1, caption = caption,  render.continuous=my.render.cont, render.categorical=my.render.cat) # Add in footnote = footnote if applicable
+
+# RR for continuous variables 
+continuous_vars <- c("SES_score", "num_lt5", "num_HH", "months_in_hh")
+categorical_vars<- c("san_basic_obs", "fixed_emp_pri", "human_feces", "animal_feces", "HFIA_category", "HW_dwell", "season_rainy", "flooding_HH_yard")
+
+# Function for continuous variables using linear regression 
+calculate_rr_continuous <- function(data, group_var, continuous_var) {
+  model <- lm(continuous_var ~ get(group_var), data = data)
+  coef_val <- exp(coef(model)[2])  # Extract coefficient for the group variable and exponentiate
+  p_val <- summary(model)$coefficients[2, 4]  # Extract p-value
+  return(c(Risk_Ratio = coef_val, p_value = p_val))
+}
+
+# Loop function over all continuous variables
+rr_continuous <- lapply(continuous_vars, function(var) {
+  calculate_rr_continuous(data = data_visit1, group_var = "fakearm", continuous_var = data_visit1[[var]])
+})
+
+print(rr_continuous)
+
+# Function for categorical variables using Poisson regression 
+calculate_rr_categorical <- function(data, group_var, categorical_var) {
+  model <- glm(categorical_var ~ get(group_var), data = data, family = poisson)
+  coef_val <- exp(coef(model)[2])  # Extract coefficient for the group variable and exponentiate
+  p_val <- summary(model)$coefficients[2, 4]  # Extract p-value
+  return(c(Risk_Ratio = coef_val, p_value = p_val))
+}
+
+# Loop function over all categorical variables
+rr_categorical <- lapply(categorical_vars, function(var) {
+  calculate_rr_categorical(data = data_visit1, group_var = "fakearm", categorical_var = data_visit1[[var]])
+})
+
+print(rr_categorical)
 
 # Cleanup
 rm(caption)
@@ -264,6 +301,58 @@ rm(caption)
 # Formatting
 
 # Data Analysis 
+
+## Categorical Vars 
+### FIB Categorical
+### Enteropathogens (P/A) - don't have this data yet
+### Satisfied with water color and appearance
+### Satisfied with water taste and smell 
+### Satisfied with water service
+### Satisfied with water pressure 
+### Satisfied with water availability 
+### Water Storage (Y/N) 
+### Water available at handwashing facility 
+### Water available at latrine 
+### Sharing of drinking water connection 
+### Sufficient quantity of drinking water 
+### Satisfied with water affordability 
+### Child consumption of drinking water 
+### Water insecure
+### HWISE scale
+
+## Continuous Vars
+### Linear regression function 
+run_linear_regression <- function(data, predictor, responses) {
+  results <- map_dfr(responses, function(response) {
+    # Fit linear regression model
+    model <- lm(paste(response, "~", predictor), data = data)
+    
+    # Extract coefficients
+    coefficients <- tidy(model)
+    
+    # Add predictor and response variable names
+    coefficients$Predictor <- predictor
+    coefficients$Response <- response
+    
+    return(coefficients)
+  })
+  
+  # Format the results as a table
+  results_table <- results %>%
+    pivot_wider(names_from = Response, values_from = c(estimate, std.error)) %>%
+    rename_with(~paste(., "Estimate", sep = "_"), contains("estimate")) %>%
+    rename_with(~paste(., "Std. Error", sep = "_"), contains("std.error")) %>%
+    select(-term)
+  
+  return(results_table)
+}
+
+# List of continuous outcome vars- need to add distance variables (hh to water main and hh to water source)
+predictor <- "fakearm"
+responses <- c("ecolimpn_stored", "ecolimpn_source", "coliformmpn_stored", "coliformmpn_source", "free_chlor", "total_chlor", "collect_contin", "timeperweek", "flow_rate", "avail_hr", "avail_day", "use_meter", "use_respond")
+
+results_univariate_continuous <- run_linear_regression(all_data, predictor, responses)
+kable(results_univariate_continuous)
 
 # Cleanup
 # rm(insert removable objects here)
