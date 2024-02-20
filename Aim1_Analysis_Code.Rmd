@@ -104,49 +104,6 @@ table(all_data$visit)
 
 # cleanup
 rm(data_filt, data, matching_fake_arm)
-
-# Water storage 
-table(all_data$water_storage)
-
-# Water available at HW facility
-table(all_data$water_HW)
-
-# Sharing of drinking water connection 
-table(all_data$share_FIPAG)
-
-# Sufficient quantity of drinking water 
-table(all_data$sufficient_quant)
-
-# Distance of HH to water main 
-
-
-# Distance of HH to drinking water source 
-
-
-# Time to collect water (min)
-summary(all_data$collect_contin)
-
-# Piped water flow rate (L/min)
-options(digits = 4)
-summary(all_data$flow_rate) 
-
-# Availability (hrs/day)
-summary(all_data$avail_hr)
-
-# Availability (days/week)
-summary(all_data$avail_day)
-
-# Water insecure households 
-table(all_data$HWISE_insecure)
-
-# Water usage (L/day) - meter
-summary(all_data$use_meter)
-
-# Water usage (L/day) - respondent 
-summary(all_data$use_respond)
-
-# Child consumption of drinking water source 
-table(all_data$child_consump)
 ```
 
 # Analysis
@@ -254,43 +211,28 @@ caption <- "Table 2. Baseline differences in covariates of interest based househ
 # footnote <- "ᵃ example footnote here"
 
 # Data Analysis
+# Create function to compute p-value for continuous or categorical variables 
+pvalue <- function(x, ...) {
+    # Construct vectors of data y, and groups (strata) g
+    y <- unlist(x)
+    g <- factor(rep(1:length(x), times=sapply(x, length)))
+    if (is.numeric(y)) {
+        # For numeric variables, perform simple linear regression
+        model <- lm(y ~ g)
+        p <- summary(model)$coefficients[2, 4]  # Extract p-value from regression summary
+    } else {
+        # For categorical variables, perform Poisson regression
+        model <- glm(table(y, g) ~ g, family = poisson)
+        p <- summary(model)$coefficients[2, 4]  # Extract p-value from regression summary
+    }
+    # Format the p-value, using an HTML entity for the less-than sign.
+    # The initial empty string places the output on the line below the variable label.
+    c("", sub("<", "&lt;", format.pval(p, digits=3, eps=0.001)))
+}
+
 
 # Create Table 1
-table1(~ SES_score + num_lt5 + num_HH + months_in_hh + san_basic_obs + fixed_emp_pri + human_feces + animal_feces + HFIA_category + HW_dwell + season_rainy + flooding_HH_yard | fakearm, data = data_visit1, caption = caption,  render.continuous=my.render.cont, render.categorical=my.render.cat) # Add in footnote = footnote if applicable
-
-# RR for continuous variables 
-continuous_vars <- c("SES_score", "num_lt5", "num_HH", "months_in_hh")
-categorical_vars<- c("san_basic_obs", "fixed_emp_pri", "human_feces", "animal_feces", "HFIA_category", "HW_dwell", "season_rainy", "flooding_HH_yard")
-
-# Function for continuous variables using linear regression 
-calculate_rr_continuous <- function(data, group_var, continuous_var) {
-  model <- lm(continuous_var ~ get(group_var), data = data)
-  coef_val <- exp(coef(model)[2])  # Extract coefficient for the group variable and exponentiate
-  p_val <- summary(model)$coefficients[2, 4]  # Extract p-value
-  return(c(Risk_Ratio = coef_val, p_value = p_val))
-}
-
-# Loop function over all continuous variables
-rr_continuous <- lapply(continuous_vars, function(var) {
-  calculate_rr_continuous(data = data_visit1, group_var = "fakearm", continuous_var = data_visit1[[var]])
-})
-
-print(rr_continuous)
-
-# Function for categorical variables using Poisson regression 
-calculate_rr_categorical <- function(data, group_var, categorical_var) {
-  model <- glm(categorical_var ~ get(group_var), data = data, family = poisson)
-  coef_val <- exp(coef(model)[2])  # Extract coefficient for the group variable and exponentiate
-  p_val <- summary(model)$coefficients[2, 4]  # Extract p-value
-  return(c(Risk_Ratio = coef_val, p_value = p_val))
-}
-
-# Loop function over all categorical variables
-rr_categorical <- lapply(categorical_vars, function(var) {
-  calculate_rr_categorical(data = data_visit1, group_var = "fakearm", categorical_var = data_visit1[[var]])
-})
-
-print(rr_categorical)
+table1(~ SES_score + num_lt5 + num_HH + months_in_hh + san_basic_obs + fixed_emp_pri + human_feces + animal_feces + HFIA_category + HW_dwell + season_rainy + flooding_HH_yard | fakearm, data = data_visit1, caption = caption,  render.continuous=my.render.cont, render.categorical=my.render.cat, extra.col = list(`P-value` = pvalue)) # Add in footnote = footnote if applicable
 
 # Cleanup
 rm(caption)
@@ -337,9 +279,11 @@ run_linear_regression <- function(data, predictor, responses) {
 predictor <- "fakearm"
 responses <- c("ecolimpn_stored", "ecolimpn_source", "coliformmpn_stored", "coliformmpn_source", "free_chlor", "total_chlor", "collect_contin", "timeperweek", "flow_rate", "avail_hr", "avail_day", "use_meter", "use_respond")
 
+### Run Regression 
 results <- run_linear_regression(all_data, predictor, responses)
-results <- t(results)
+results <- t(results) # transposing for aesthetics 
 
+### Create rmarkdown table 
 results_table_continuous <- kable(results, align = "lccc") %>%
   kable_styling(full_width = FALSE) %>%
   column_spec(1, bold = TRUE) %>%
@@ -348,10 +292,13 @@ results_table_continuous <- kable(results, align = "lccc") %>%
 
 results_table_continuous
 
+### Convert the table to a flextable object to output into Word 
+table3a <- flextable(as.data.frame(results))
+print(table3a, preview = "docx")
 
 ## Categorical Vars 
 
-## Poisson regression function - model did not converge with log binomial (based on Liz/Josh's suggestion)
+### Poisson regression function - model did not converge with log binomial (based on Liz/Josh's suggestion)
 run_poisson_regression_with_rr <- function(data, predictor, responses) {
   results <- map_dfr(responses, function(response) {
     # Fit Poisson regression model
@@ -394,6 +341,10 @@ results_table_cat <- kable(results, align = "lccc", format = "html") %>%
   row_spec(1:nrow(results), background = "white")  # Alternate row colors
 
 results_table_cat
+
+### Create output table to Word 
+table3b <- flextable(as.data.frame(results))
+print(table3b, preview = "docx")
 
 # Cleanup
 # rm(insert removable objects here)
