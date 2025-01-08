@@ -1,12 +1,10 @@
-# analysis-template
+# PAASIM Water Quality Analysis
 
-template repository for data analyses in the Brosi Lab
+* Authors
+  Courtney P. Victor<sup>1<sup>, Joshua V. Garn<sup>2<sup>, Rassul Nalá3, João Luis Manuel4, Magalhães Mangamela5, Sandra McGunegill1, Jedidiah S. Snyder1, Sydney Hubbard1, Christine S. Fagnant-Sperati6, Joe Brown7, Thomas Clasen1, Konstantinos T. Konstantinidis8, Elizabeth T. Rogawski McQuade9, Lance A. Waller10, Karen Levy6* & Matthew C. Freeman1* on behalf of The PAASIM Study Authorship Group
 
-When using this as a template, be sure to update this README file, replacing all of the text except for some of the text related to the folders in the "file structure"" section. 
+*Authors contributed equally
 
-In particular, you will want to include text on:
-
-* authors / contributors
 * when the analysis is published, a citation and link to the paper
 * a brief description of where the data are from
 * a brief description of what the analysis is getting at 
